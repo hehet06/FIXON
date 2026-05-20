@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ATEEZ: FIX ON CHALLENGE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #111; color: #fff; font-family: sans-serif; touch-action: manipulation; }
+        .glitch-text { text-shadow: 2px 0 red, -2px 0 cyan; animation: glitch 1.5s infinite linear alternate-reverse; }
+        @keyframes glitch { 0% { text-shadow: 2px 0 red, -2px 0 cyan; } 100% { text-shadow: -2px 0 red, 2px 0 cyan; } }
+        button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        #video-cover { will-change: opacity; transition: opacity 0.3s ease; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div id="start-screen" class="max-w-2xl text-center space-y-6">
+        <h1 class="text-4xl md:text-5xl font-black text-orange-500 glitch-text mb-8">FIX ON <br><span class="text-2xl md:text-3xl text-white">CHALLENGE</span></h1>
+        
+        <div class="bg-gray-800 p-4 rounded text-[10px] text-gray-400 text-left border border-gray-700 space-y-2">
+            <p><strong>免責聲明 Disclaimer：</strong></p>
+            <p>1. 版權屬於 KQ Entertainment 與 ATEEZ 所有。<br>All copyrights belong to KQ Entertainment and ATEEZ.</p>
+            <p>2. 本頁面僅供粉絲娛樂使用，無任何商業用途。<br>For fan entertainment purposes only, no commercial use intended.</p>
+            <p>3. 使用 YouTube 官方嵌入，觀看次數皆直接計算於官方頻道。<br>Uses official YouTube embeds; view counts are credited to the official channel.</p>
+        </div>
+
+        <div class="bg-orange-900/20 p-4 rounded border border-orange-700 text-orange-200 text-[10px]">
+            <p><strong>💡 遊玩建議 Playing Tips：</strong></p>
+            <p>建議在良好網路環境下遊玩。<br>Please play in a stable internet environment.</p>
+            <p>點擊「播放片段」後請稍作等待，影片載入需要幾秒鐘。<br>After clicking "Play", please wait a few seconds for the video to load.</p>
+            <p>若沒有反應，請嘗試重新點擊。<br>If there is no response, please try clicking again.</p>
+        </div>
+
+        <button onclick="startGame()" class="px-10 py-4 bg-orange-600 font-bold rounded-full hover:bg-orange-500 w-full md:w-auto shadow-lg shadow-orange-900/50">開始挑戰 (共 10 題) Start Challenge</button>
+    </div>
+
+    <div id="game-screen" class="hidden w-full max-w-4xl flex flex-col items-center space-y-4">
+        <div class="flex justify-between w-full text-gray-400 font-bold px-2"><span id="score-display">分數: 0</span><span id="round-display">第 1 / 10 題</span></div>
+        <div class="relative w-full aspect-video bg-black rounded-lg overflow-hidden shadow-2xl border-2 border-gray-800">
+            <div id="player" class="w-full h-full"></div>
+            <div id="video-cover" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black">
+                <button id="play-snippet-btn" onclick="playSnippet()" class="px-8 py-4 bg-red-700 rounded-full font-bold shadow-lg hover:bg-red-600 text-lg active:scale-95 transition-transform" disabled>正在準備片段...</button>
+            </div>
+        </div>
+        <div id="options-container" class="grid grid-cols-2 gap-3 w-full"></div>
+    </div>
+
+    <div id="result-screen" class="hidden flex-col items-center justify-center p-4 text-center space-y-6">
+        <img id="result-image" src="" class="w-48 h-48 mx-auto my-4 rounded-lg shadow-lg hidden" alt="Rank Icon" onerror="this.src='https://placehold.co/200x200/333/fff?text=ATEEZ'">
+        <h2 id="final-rank" class="text-3xl md:text-4xl font-black text-orange-500"></h2>
+        <p id="final-score" class="text-2xl"></p>
+        
+        <div class="mt-4">
+            <a href="https://www.youtube.com/watch?v=uD0yLUVtAvk" target="_blank" class="text-orange-400 font-bold text-xs hover:text-orange-300 underline">
+                👉Our Best Mingi's new MV - Dinero 🔥👈
+            </a>
+        </div>
+
+        <button onclick="location.reload()" class="px-8 py-3 bg-gray-700 rounded-full font-bold hover:bg-gray-600">重新挑戰</button>
+        
+        <div class="mt-8 p-4 border-t border-gray-700 w-full max-w-sm">
+            <p class="text-gray-400 mb-2">有 bug 或相關提問請回饋給我：</p>
+            <a href="https://peing.net/zh-TW/yeooooo" target="_blank" class="text-blue-400 hover:text-blue-300 underline">匿名提問箱 (Peing)</a>
+        </div>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        const SONGS_DATABASE = [
+            { title: "HALA HALA", id: "QbjmVyP9RFg", start: 134.2, duration: 0.6 },
+            { title: "Say My Name", id: "nKU4OVH18mE", start: 108.2, duration: 0.5 },
+            { title: "WONDERLAND", id: "Z_BhMhZpAug", start: 78.7, duration: 0.6 },
+            { title: "THANXX", id: "K7LY9Ta0eiY", start: 89.2, duration: 0.8 },
+            { title: "Fireworks", id: "xtcVwuauVV0", start: 46.2, duration: 0.7 },
+            { title: "Guerrilla", id: "2HcVZm_4qAI", start: 108.3, duration: 0.8 },
+            { title: "Cyberpunk", id: "JWKaccs2IAM", start: 45, duration: 0.7 },
+            { title: "BOUNCY", id: "U0G5OA6ZH5w", start: 104.8, duration: 0.7 },
+            { title: "Crazy Form", id: "9t57C7NcjWo", start: 36.2, duration: 0.4 },
+            { title: "ARRIBA", id: "_Pd5fZDV33M", start: 100, duration: 0.5 },
+            { title: "The Leaders", id: "7vGGzN70KeA", start: 40, duration: 0.7 },
+            { title: "ROAR", id: "mdIT5Z4cLlY", start: 12.9, duration: 0.65 },
+            { title: "Dinero", id: "uD0yLUVtAvk", start: 43.5, duration: 1.2 },
+            { title: "Wake Up", id: "ZdmFxXMdQ7s", start: 25.4, duration: 0.7 },
+            { title: "Don't Stop", id: "zuDj1vthAnw", start: 46.4, duration: 1.1 },
+            { title: "New World", id: "9_xKGr2OPv0", start: 105.3, duration: 0.55 },
+            { title: "In Your Fantacy", id: "JOF2ZTqvzwY", start: 105.1, duration: 0.7 },
+            { title: "Work", id: "VGnOpZhsPk4", start: 118, duration: 0.6 }
+        ];
+
+        let player, gameSongs = [], currentIdx = 0, score = 0, stopTimer = null, playbackTimer = null;
+
+        function onYouTubeIframeAPIReady() { 
+            player = new YT.Player('player', { 
+                height: '100%', width: '100%', 
+                playerVars: { playsinline: 1, rel: 0, modestbranding: 1, origin: window.location.origin } 
+            }); 
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            gameSongs = [...SONGS_DATABASE].sort(() => 0.5 - Math.random()).slice(0, 10);
+            playRound();
+        }
+
+        function playRound() {
+            document.getElementById('video-cover').style.display = 'flex';
+            document.getElementById('options-container').innerHTML = '';
+            
+            const btn = document.getElementById('play-snippet-btn');
+            btn.innerText = "正在準備片段...";
+            btn.disabled = true;
+
+            let song = gameSongs[currentIdx];
+            
+            player.cueVideoById({ videoId: song.id, startSeconds: song.start });
+            
+            setTimeout(() => {
+                btn.innerText = "播放 FIX ON 片段";
+                btn.disabled = false;
+            }, 1000);
+
+            let options = [song, ...SONGS_DATABASE.filter(s => s.title !== song.title).sort(() => 0.5 - Math.random()).slice(0, 3)].sort(() => 0.5 - Math.random());
+            
+            options.forEach(opt => {
+                let btn = document.createElement('button');
+                btn.className = "py-4 bg-gray-800 rounded-lg font-bold hover:bg-gray-700 border border-gray-600 active:scale-95 transition-transform";
+                btn.innerText = opt.title;
+                btn.onclick = () => checkAnswer(opt.title === song.title, btn);
+                document.getElementById('options-container').appendChild(btn);
+            });
+        }
+
+        function playSnippet() {
+            if (playbackTimer) clearTimeout(playbackTimer);
+            const song = gameSongs[currentIdx];
+            player.seekTo(song.start);
+            player.playVideo(); 
+            playbackTimer = setTimeout(() => { player.pauseVideo(); }, song.duration * 1000 + 300);
+        }
+
+        function checkAnswer(isCorrect, btn) {
+            if (playbackTimer) clearTimeout(playbackTimer);
+            document.getElementById('options-container').querySelectorAll('button').forEach(b => b.disabled = true);
+            if (isCorrect) { score += 10; btn.classList.replace('bg-gray-800', 'bg-green-600'); }
+            else { btn.classList.replace('bg-gray-800', 'bg-red-600'); document.getElementById('options-container').querySelectorAll('button').forEach(b => { if(b.innerText === gameSongs[currentIdx].title) b.classList.replace('bg-gray-800', 'bg-green-600'); }); }
+            
+            document.getElementById('video-cover').style.display = 'none';
+            player.loadVideoById({ videoId: gameSongs[currentIdx].id, startSeconds: Math.max(0, gameSongs[currentIdx].start - 1) });
+            
+            if (stopTimer) clearTimeout(stopTimer);
+            stopTimer = setTimeout(() => { player.pauseVideo(); }, 2500);
+
+            setTimeout(() => {
+                currentIdx++;
+                if (currentIdx < 10) { 
+                    document.getElementById('score-display').innerText = `分數: ${score}`; 
+                    document.getElementById('round-display').innerText = `第 ${currentIdx + 1} / 10 題`; 
+                    playRound(); 
+                } else { showResult(); }
+            }, 3000);
+        }
+
+        function showResult() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = `總分: ${score} 分`;
+            
+            const img = document.getElementById('result-image');
+            img.classList.remove('hidden');
+
+            const ranks = [
+                { s: 100, t: "滿分旼梯子", u: "https://i.meee.com.tw/t4nLf0d.jpg" },
+                { s: 90, t: "跌倒後徘徊", u: "https://i.meee.com.tw/saSQFuV.jpg" },
+                { s: 80, t: "晚安大小姐", u: "https://i.meee.com.tw/zw6reWH.jpg" },
+                { s: 70, t: "Fix on", u: "https://i.meee.com.tw/MuRjbo1.jpg" },
+                { s: 60, t: "Fix off", u: "https://i.meee.com.tw/sjwCJod.jpg" },
+                { s: 0, t: "Naomyeon kkaendanikka nan", u: "https://i.meee.com.tw/sfaexV0.jpg" }
+            ];
+
+            const rank = ranks.find(r => score >= r.s);
+            document.getElementById('final-rank').innerText = rank.t;
+            img.src = rank.u;
+            img.onerror = function() { this.src = 'https://placehold.co/200x200/333/fff?text=ATEEZ'; };
+        }
+    </script>
+</body>
+</html>
